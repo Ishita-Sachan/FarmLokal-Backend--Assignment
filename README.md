@@ -1,54 +1,53 @@
-# FarmLokal-Backend--Assignment
-A high-performance Node.js backend designed to handle 1,000,000 product records with sub-200ms latency. This project implements a scalable architecture using MySQL for persistence and Redis for high-speed caching and idempotency.
+🚜 FarmLokal Backend Assignment
+A high-performance Node.js/TypeScript backend capable of handling 1,000,000+ product records with sub-200ms latency, featuring Redis caching, idempotent webhooks, and external API synchronization.
 
-🚀 Setup Instructions
+🚀 Features - 
+1 Million Product Dataset: Seeding script using @faker-js/faker for realistic data.
 
-1- Clone the Repository
+Optimized Search & Filter: Instant retrieval by Name, Category, and Price Range.
 
-2- Install Dependencies
+Redis Caching (Memurai): Drastically reduces MySQL load by caching frequent queries.
 
-3- Environment Configuration Create a .env file in the root directory and add your credentials:
+Cursor-Based Pagination: Ensures consistent performance even when navigating deep into millions of records.
 
-4- Seed the Database (1 Million Records) Ensure MySQL and Redis (Memurai) are running, then run:
+Idempotent Webhooks: Prevents duplicate event processing using Redis locks.
 
-5- Start the Server
+Reliable External Sync: Synchronous API calls with built-in timeouts and OAuth2 token caching.
 
-🏗️ Architecture Overview
+🛠️ Tech Stack
+Runtime: Node.js (v22+)
 
-The system is built with a focus on high availability and low latency:
+Language: TypeScript (NodeNext ESM)
 
-1- API Layer: Express.js with TypeScript handles routing and validation.
+Database: MySQL (Sequelize ORM)
 
-2- Caching Layer: Redis (Memurai) is used for query result caching and webhook idempotency.
+Cache: Redis (Memurai for Windows)
 
-3- Persistence Layer: MySQL managed via Sequelize ORM with optimized indexing.
+API: Express.js
 
-4- Security: Environment variable management via dotenv to keep credentials secure.
+Validation: Axios for external calls
 
-⚡ Caching Strategy
+📈 Optimization Strategies
+Database Indexing: Added B-Tree indexes to category, name, and price columns in MySQL to ensure searches don't require full table scans.
 
-To achieve P95 latency < 200ms, I implemented a multi-layered caching strategy:
+P95 Latency Reduction: Implemented a "Cache-Aside" pattern. API requests hit Redis first; only cache misses trigger a MySQL query.
 
-1- Query Caching: Product search and category filter results are cached in Redis for 5 minutes.
+Memory Management: Used bulkCreate in the seeder to batch inserts, preventing memory overflows while generating 1M records.
 
-2- Auth Caching: Simulated OAuth2 tokens are cached for 1 hour to minimize overhead.
+⚙️ Installation & Setup
+1. Database Setup
+Install MySQL and create the database:
 
-3- Webhook Idempotency: Each eventId is cached for 24 hours in Redis using SET NX to prevent duplicate processing.
+Update the password in database.ts.
 
-📈 Performance Optimizations
+2. Install Dependencies
+3. Seed the Data (1 Million Records)
+4. Run the Server
 
-1- B-Tree Indexing: Composite indexes on category and name columns transform full-table scans (O(N)) into logarithmic searches (O(log N)).
+🧪 Testing the API
 
-2- Cursor-based Pagination: Uses WHERE id > cursor instead of OFFSET to ensure constant-time performance even on the 100,000th page.
+🛡️ Reliability & Security
+Idempotency: Webhooks use the SET NX command in Redis to ensure an eventId is only processed once every 24 hours.
 
-3- Batch Operations: The seeding script uses bulkCreate with a batch size of 10,000, reducing I/O overhead significantly.
+Fault Tolerance: External API calls are protected by a 2-second timeout to prevent request hanging and resource exhaustion.
 
-4- Connection Pooling: Optimized Sequelize pool settings to handle high concurrent request volumes.
-
-⚖️ Trade-offs Made
-
-1- Eventual Consistency: By caching search results for 5 minutes, there is a small window where newly added products may not appear. This was chosen to prioritize speed and reduce DB load.
-
-2- In-Memory Caching: Redis is used for fast access, but for mission-critical persistence of logs, a secondary disk-based logging system would be required in production.
-
-3- Simplistic Search: I used SQL LIKE queries for this assignment. For more complex "fuzzy" search needs (e.g., spellcheck), integrating ElasticSearch would be the next step.

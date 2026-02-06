@@ -35,14 +35,34 @@ P95 Latency Reduction: Implemented a "Cache-Aside" pattern. API requests hit Red
 Memory Management: Used bulkCreate in the seeder to batch inserts, preventing memory overflows while generating 1M records.
 
 ⚙️ Installation & Setup
-1. Database Setup
-Install MySQL and create the database:
 
-Update the password in database.ts.
+1. Environment Configuration 🛡️
+Since this project follows security best practices, sensitive credentials are not stored in the source code. 
+**You must create a `.env` file in the root directory** and add your local credentials:
+
+PORT=3000
+
+DB_NAME=farmlokal_db
+
+DB_USER=root
+
+DB_PASSWORD=your_mysql_password
+
+DB_HOST=localhost
+
+REDIS_URL=redis://localhost:6379
 
 2. Install Dependencies
+npm install
+
 3. Seed the Data (1 Million Records)
+   
+Ensure MySQL and Redis are running, then run the seeder:
+npx tsx seed.ts
+
 4. Run the Server
+ 
+npx tsx server.ts
 
 🧪 Testing the API
 
@@ -50,4 +70,5 @@ Update the password in database.ts.
 Idempotency: Webhooks use the SET NX command in Redis to ensure an eventId is only processed once every 24 hours.
 
 Fault Tolerance: External API calls are protected by a 2-second timeout to prevent request hanging and resource exhaustion.
+
 
